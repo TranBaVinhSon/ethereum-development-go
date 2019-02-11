@@ -11,5 +11,5 @@ func main() {
 
   fmt.Println(address.Hex())        // 0x71C7656EC7ab88b098defB751B7401B5f6d8976F
   fmt.Println(address.Hash().Hex()) // 0x00000000000000000000000071c7656ec7ab88b098defb751b7401b5f6d8976f
-  fmt.Println(address.Bytes()) 
+  fmt.Println(address.Bytes())
 }
