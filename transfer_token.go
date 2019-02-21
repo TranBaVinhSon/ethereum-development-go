@@ -22,6 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// load private key
 	privateKey, err := crypto.HexToECDSA("fad9c8855b740a0b7ed4c221dbad0f33a83a49cad6b3fe8d5817ac83d38b6a19")
 	if err != nil {
 		log.Fatal(err)
@@ -34,6 +35,7 @@ func main() {
 	}
 
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	// get nonce from Address
 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 	if err != nil {
 		log.Fatal(err)
@@ -46,22 +48,30 @@ func main() {
 	}
 
 	toAddress := common.HexToAddress("0x4592d8f8d7b001e72cb26a73e4fa1806a51ac79d")
+	// token contract address
 	tokenAddress := common.HexToAddress("0x28b149020d2152179873ec60bed6bf7cd705775d")
 
+	// uint256 is amount of tokens to send
 	transferFnSignature := []byte("transfer(address,uint256)")
+	// generate hash
 	hash := sha3.NewLegacyKeccak256()
 	hash.Write(transferFnSignature)
+	// only need first 4 bytes to have the method ID
 	methodID := hash.Sum(nil)[:4]
 	fmt.Println(hexutil.Encode(methodID))
 
+	// we need to left pad 32 bytes the address we're sending tokens to
 	paddedAddress := common.LeftPadBytes(toAddress.Bytes(), 32)
 	fmt.Println(hexutil.Encode(paddedAddress))
 
+	// format in wei
 	amount := new(big.Int)
-	amount.SetString("1000000000000000000000", 10) // 100 tokens
+	amount.SetString("1000000000000000000000", 10) // 1000 tokens
+	// left padding 32 bytes required
 	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 	fmt.Println(hexutil.Encode(paddedAmount))
 
+	// concanate the methodID, paddedAddress, paddedAmount
 	var data []byte
 	data = append(data, methodID...)
 	data = append(data, paddedAddress...)
@@ -91,6 +101,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// send transaction
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
 		log.Fatal(err)
